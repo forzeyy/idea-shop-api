@@ -9,7 +9,7 @@ import (
 type ProductRepository interface {
 	GetAllProducts() ([]models.Product, error)
 	GetProductByID(id uint) (models.Product, error)
-	CreateProduct() (models.Product, error)
+	CreateProduct(models.Product) (models.Product, error)
 	UpdateProduct(models.Product) (models.Product, error)
 	DeleteProduct(models.Product) (models.Product, error)
 }
@@ -32,7 +32,7 @@ func (db *productRepository) GetProductByID(id uint) (product models.Product, er
 	return product, db.conn.First(&product, id).Error
 }
 
-func (db *productRepository) CreateProduct() (product models.Product, err error) {
+func (db *productRepository) CreateProduct(product models.Product) (models.Product, error) {
 	return product, db.conn.Create(&product).Error
 }
 
