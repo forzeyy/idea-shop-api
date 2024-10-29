@@ -42,10 +42,11 @@ func (db *userRepository) CreateUser(user models.User) (models.User, error) {
 }
 
 func (db *userRepository) UpdateUser(user models.User) (models.User, error) {
-	if err := db.conn.First(&user, user.ID).Error; err != nil {
+	var existingUser models.User
+	if err := db.conn.First(&existingUser, user.ID).Error; err != nil {
 		return user, err
 	}
-	return user, db.conn.Model(&user).Updates(&user).Error
+	return user, db.conn.Model(&existingUser).Updates(user).Error
 }
 
 func (db *userRepository) DeleteUser(user models.User) (models.User, error) {

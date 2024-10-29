@@ -45,10 +45,11 @@ func (db *orderRepository) CreateOrder(order models.Order) (models.Order, error)
 }
 
 func (db *orderRepository) UpdateOrder(order models.Order) (models.Order, error) {
-	if err := db.conn.First(&order, order.ID).Error; err != nil {
+	var existingOrder models.Order
+	if err := db.conn.First(&existingOrder, order.ID).Error; err != nil {
 		return order, err
 	}
-	return order, db.conn.Model(&order).Updates(&order).Error
+	return order, db.conn.Model(&existingOrder).Updates(order).Error
 }
 
 func (db *orderRepository) DeleteOrder(order models.Order) (models.Order, error) {

@@ -37,10 +37,11 @@ func (db *productRepository) CreateProduct(product models.Product) (models.Produ
 }
 
 func (db *productRepository) UpdateProduct(product models.Product) (models.Product, error) {
-	if err := db.conn.First(&product, product.ID).Error; err != nil {
+	var existingProduct models.Product
+	if err := db.conn.First(&existingProduct, product.ID).Error; err != nil {
 		return product, err
 	}
-	return product, db.conn.Model(&product).Updates(&product).Error
+	return product, db.conn.Model(&existingProduct).Updates(product).Error
 }
 
 func (db *productRepository) DeleteProduct(product models.Product) (models.Product, error) {
