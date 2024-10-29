@@ -9,6 +9,7 @@ import (
 type UserRepository interface {
 	GetAllUsers() ([]models.User, error)
 	GetUserByID(id uint) (models.User, error)
+	GetUserByPhone(phone string) (models.User, error)
 	CreateUser(models.User) (models.User, error)
 	UpdateUser(models.User) (models.User, error)
 	DeleteUser(models.User) (models.User, error)
@@ -30,6 +31,10 @@ func (db *userRepository) GetAllUsers() (users []models.User, err error) {
 
 func (db *userRepository) GetUserByID(id uint) (user models.User, err error) {
 	return user, db.conn.First(&user, id).Error
+}
+
+func (db *userRepository) GetUserByPhone(phone string) (user models.User, err error) {
+	return user, db.conn.Where("phone = ?", phone).First(&user).Error
 }
 
 func (db *userRepository) CreateUser(user models.User) (models.User, error) {

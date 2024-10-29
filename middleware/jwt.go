@@ -1,14 +1,18 @@
 package middleware
 
 import (
+	"os"
+
 	jwtware "github.com/gofiber/contrib/jwt"
 	"github.com/gofiber/fiber/v2"
 )
 
+var JwtSecret = []byte(os.Getenv("JWT_SECRET"))
+
 // Protected protect routes
 func Protected() func(*fiber.Ctx) error {
 	return jwtware.New(jwtware.Config{
-		SigningKey:   jwtware.SigningKey{Key: []byte("secret")},
+		SigningKey:   jwtware.SigningKey{Key: JwtSecret},
 		ErrorHandler: jwtError,
 	})
 }
