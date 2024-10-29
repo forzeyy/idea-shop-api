@@ -98,11 +98,6 @@ func (h *productHandler) UpdateProduct(c *fiber.Ctx) error {
 
 func (h *productHandler) DeleteProduct(c *fiber.Ctx) error {
 	var product models.Product
-	if err := c.BodyParser(&product); err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"error": err.Error(),
-		})
-	}
 
 	prodID, err := c.ParamsInt("id")
 	if err != nil {

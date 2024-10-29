@@ -7,9 +7,8 @@ import (
 )
 
 type UserRepository interface {
-	GetAllUser() ([]models.User, error)
+	GetAllUsers() ([]models.User, error)
 	GetUserByID(id uint) (models.User, error)
-	GetUserByPhone(phone string) (models.User, error)
 	CreateUser(models.User) (models.User, error)
 	UpdateUser(models.User) (models.User, error)
 	DeleteUser(models.User) (models.User, error)
@@ -25,16 +24,12 @@ func NewUserRepository() UserRepository {
 	}
 }
 
-func (db *userRepository) GetAllUser() (users []models.User, err error) {
+func (db *userRepository) GetAllUsers() (users []models.User, err error) {
 	return users, db.conn.Find(&users).Error
 }
 
 func (db *userRepository) GetUserByID(id uint) (user models.User, err error) {
 	return user, db.conn.First(&user, id).Error
-}
-
-func (db *userRepository) GetUserByPhone(phone string) (user models.User, err error) {
-	return user, db.conn.First(&user, phone).Error
 }
 
 func (db *userRepository) CreateUser(user models.User) (models.User, error) {
