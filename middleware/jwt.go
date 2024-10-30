@@ -7,12 +7,13 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
-var JwtSecret = []byte(os.Getenv("JWT_SECRET"))
+var AccessSecret = []byte(os.Getenv("ACCESS_JWT_SECRET"))
+var RefreshSecret = []byte(os.Getenv("REFRESH_JWT_SECRET"))
 
 // Protected protect routes
 func Protected() func(*fiber.Ctx) error {
 	return jwtware.New(jwtware.Config{
-		SigningKey:   jwtware.SigningKey{Key: JwtSecret},
+		SigningKey:   jwtware.SigningKey{Key: AccessSecret},
 		ErrorHandler: jwtError,
 	})
 }

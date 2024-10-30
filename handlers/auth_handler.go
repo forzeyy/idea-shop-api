@@ -2,15 +2,18 @@ package handlers
 
 import (
 	"github.com/forzeyy/idea-shop-api/auth"
+	"github.com/forzeyy/idea-shop-api/middleware"
 	"github.com/forzeyy/idea-shop-api/models"
 	"github.com/forzeyy/idea-shop-api/repositories"
 	"github.com/forzeyy/idea-shop-api/utils"
 	"github.com/gofiber/fiber/v2"
+	"github.com/golang-jwt/jwt/v5"
 )
 
 type AuthHandler interface {
 	Login(*fiber.Ctx) error
 	Register(*fiber.Ctx) error
+	RefreshToken(*fiber.Ctx) error
 }
 
 type authHandler struct {
@@ -35,26 +38,30 @@ func (h *authHandler) Login(c *fiber.Ctx) error {
 	}
 
 	user, err := h.userRepo.GetUserByPhone(loginData.Phone)
-	if err != nil {
+	if err != nil || !utils.CheckPassword(user.Password, loginData.Password) {
 		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
 			"error": "invalid phone or password",
 		})
 	}
 
-	if !utils.CheckPassword(user.Password, loginData.Password) {
-		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
-			"error": "invalid phone or password",
-		})
-	}
-
-	token, err := auth.GenerateJWT(user.ID)
+	accessToken, err := auth.GenerateAccessToken(user.ID)
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"error": "couldn't generate token",
 		})
 	}
 
-	return c.JSON(fiber.Map{"token": token})
+	refreshToken, err := auth.GenerateRefreshToken(user.ID)
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": "couldn't generate token",
+		})
+	}
+
+	return c.JSON(fiber.Map{
+		"access_token":  accessToken,
+		"refresh_token": refreshToken,
+	})
 }
 
 func (h *authHandler) Register(c *fiber.Ctx) error {
@@ -68,7 +75,7 @@ func (h *authHandler) Register(c *fiber.Ctx) error {
 	hashedPassword, err := utils.HashPassword(user.Password)
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"error": "could'nt hash password",
+			"error": "couldn't hash password",
 		})
 	}
 	user.Password = hashedPassword
@@ -81,5 +88,45 @@ func (h *authHandler) Register(c *fiber.Ctx) error {
 
 	return c.Status(fiber.StatusCreated).JSON(fiber.Map{
 		"message": "success",
+	})
+}
+
+func (h *authHandler) RefreshToken(c *fiber.Ctx) error {
+	var inputToken struct {
+		RefreshToken string `json:"refresh_token"`
+	}
+
+	if err := c.BodyParser(&inputToken); err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": "bad input",
+		})
+	}
+
+	token, err := jwt.Parse(inputToken.RefreshToken, func(token *jwt.Token) (interface{}, error) {
+		return middleware.RefreshSecret, nil
+	})
+	if err != nil || !token.Valid {
+		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
+			"error": "expired or invalid refresh token",
+		})
+	}
+
+	claims, ok := token.Claims.(jwt.MapClaims)
+	if !ok || !token.Valid {
+		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
+			"error": "invalid token",
+		})
+	}
+
+	userID := uint(claims["user_id"].(float64))
+	accessToken, err := auth.GenerateAccessToken(userID)
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": "couldn't generate access token",
+		})
+	}
+
+	return c.JSON(fiber.Map{
+		"access_token": accessToken,
 	})
 }

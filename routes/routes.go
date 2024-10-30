@@ -20,6 +20,7 @@ func SetupRoutes(app *fiber.App) {
 
 	api.Post("/login", authHandler.Login)
 	api.Post("/register", authHandler.Register)
+	api.Post("/refresh", authHandler.RefreshToken)
 
 	api.Get("/products", productHandler.GetAllProducts)
 	api.Get("/products/:id", productHandler.GetProductByID)

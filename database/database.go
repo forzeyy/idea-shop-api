@@ -21,7 +21,7 @@ func ConnectDatabase() *gorm.DB {
 	db.Logger = logger.Default.LogMode(logger.Info)
 
 	log.Println("running migrations...")
-	db.AutoMigrate(&models.User{}, &models.Product{}, &models.Cart{}, &models.Category{}, &models.Order{}, &models.Comment{})
+	db.AutoMigrate(&models.User{}, &models.Product{}, &models.Cart{}, &models.CartItem{}, &models.Category{}, &models.Order{}, &models.Comment{})
 	log.Println("done!")
 
 	return db
