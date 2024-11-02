@@ -4,13 +4,12 @@ import (
 	"github.com/forzeyy/idea-shop-api/models"
 	"github.com/forzeyy/idea-shop-api/repositories"
 	"github.com/gofiber/fiber/v2"
+	"github.com/golang-jwt/jwt/v5"
 )
 
 type UserHandler interface {
-	GetAllUsers(*fiber.Ctx) error
-	GetUserByID(*fiber.Ctx) error
-	UpdateUser(*fiber.Ctx) error
-	DeleteUser(*fiber.Ctx) error
+	GetProfile(*fiber.Ctx) error
+	UpdateProfile(*fiber.Ctx) error
 }
 
 type userHandler struct {
@@ -23,76 +22,50 @@ func NewUserHandler() UserHandler {
 	}
 }
 
-func (h *userHandler) GetAllUsers(c *fiber.Ctx) error {
-	users, err := h.repo.GetAllUsers()
-	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"error": err.Error(),
-		})
-	}
+func (h *userHandler) GetProfile(c *fiber.Ctx) error {
+	userToken := c.Locals("user").(*jwt.Token)
+	claims := userToken.Claims.(jwt.MapClaims)
 
-	return c.Status(fiber.StatusOK).JSON(users)
-}
-
-func (h *userHandler) GetUserByID(c *fiber.Ctx) error {
-	userID, err := c.ParamsInt("id")
-	if err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"error": err.Error(),
+	userID, ok := claims["user_id"].(float64)
+	if !ok {
+		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
+			"error": "invalid token",
 		})
 	}
 
 	user, err := h.repo.GetUserByID(uint(userID))
 	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"error": err.Error(),
+		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
+			"error": "user not found",
 		})
 	}
 
 	return c.Status(fiber.StatusOK).JSON(user)
 }
 
-func (h *userHandler) UpdateUser(c *fiber.Ctx) error {
+func (h *userHandler) UpdateProfile(c *fiber.Ctx) error {
+	userToken := c.Locals("user").(*jwt.Token)
+	claims := userToken.Claims.(jwt.MapClaims)
+
+	userID, ok := claims["user_id"].(float64)
+	if !ok {
+		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
+			"error": "invalid token",
+		})
+	}
+
 	var user models.User
 	if err := c.BodyParser(&user); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"error": err.Error(),
-		})
-	}
-
-	userID, err := c.ParamsInt("id")
-	if err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"error": err.Error(),
+			"error": "invalid input",
 		})
 	}
 
 	user.ID = uint(userID)
-	user, err = h.repo.UpdateUser(user)
+	user, err := h.repo.UpdateUser(user)
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"error": err.Error(),
-		})
-	}
-
-	return c.Status(fiber.StatusOK).JSON(user)
-}
-
-func (h *userHandler) DeleteUser(c *fiber.Ctx) error {
-	var user models.User
-
-	userID, err := c.ParamsInt("id")
-	if err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"error": err.Error(),
-		})
-	}
-
-	user.ID = uint(userID)
-	user, err = h.repo.DeleteUser(user)
-	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"error": err.Error(),
+			"error": "couldn't update profile",
 		})
 	}
 

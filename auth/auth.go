@@ -7,10 +7,13 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 )
 
+var AccessTokenLifetime time.Time = time.Now().Add(time.Minute * 10)
+var RefreshTokenLifetime time.Time = time.Now().Add(14 * 24 * time.Hour)
+
 func GenerateAccessToken(userID uint) (string, error) {
 	claims := jwt.MapClaims{
 		"user_id": userID,
-		"exp":     time.Now().Add(time.Minute * 10).Unix(),
+		"exp":     AccessTokenLifetime.Unix(),
 	}
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 	return token.SignedString(middleware.AccessSecret)
@@ -19,7 +22,7 @@ func GenerateAccessToken(userID uint) (string, error) {
 func GenerateRefreshToken(userID uint) (string, error) {
 	claims := jwt.MapClaims{
 		"user_id": userID,
-		"exp":     time.Now().Add(14 * 24 * time.Hour).Unix(),
+		"exp":     RefreshTokenLifetime.Unix(),
 	}
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 	return token.SignedString(middleware.RefreshSecret)

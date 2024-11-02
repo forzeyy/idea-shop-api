@@ -13,7 +13,7 @@ import (
 type AuthHandler interface {
 	Login(*fiber.Ctx) error
 	Register(*fiber.Ctx) error
-	RefreshToken(*fiber.Ctx) error
+	Refresh(*fiber.Ctx) error
 }
 
 type authHandler struct {
@@ -58,9 +58,26 @@ func (h *authHandler) Login(c *fiber.Ctx) error {
 		})
 	}
 
+	c.Cookie(&fiber.Cookie{
+		Name:     "access_token",
+		Value:    accessToken,
+		Expires:  auth.AccessTokenLifetime,
+		HTTPOnly: true,
+		Secure:   true,
+		SameSite: "Lax",
+	})
+
+	c.Cookie(&fiber.Cookie{
+		Name:     "refresh_token",
+		Value:    refreshToken,
+		Expires:  auth.RefreshTokenLifetime,
+		HTTPOnly: true,
+		Secure:   true,
+		SameSite: "Lax",
+	})
+
 	return c.JSON(fiber.Map{
-		"access_token":  accessToken,
-		"refresh_token": refreshToken,
+		"message": "successfully logged in",
 	})
 }
 
@@ -91,7 +108,7 @@ func (h *authHandler) Register(c *fiber.Ctx) error {
 	})
 }
 
-func (h *authHandler) RefreshToken(c *fiber.Ctx) error {
+func (h *authHandler) Refresh(c *fiber.Ctx) error {
 	var inputToken struct {
 		RefreshToken string `json:"refresh_token"`
 	}
@@ -126,7 +143,16 @@ func (h *authHandler) RefreshToken(c *fiber.Ctx) error {
 		})
 	}
 
+	c.Cookie(&fiber.Cookie{
+		Name:     "access_token",
+		Value:    accessToken,
+		Expires:  auth.AccessTokenLifetime,
+		HTTPOnly: true,
+		Secure:   true,
+		SameSite: "Lax",
+	})
+
 	return c.JSON(fiber.Map{
-		"access_token": accessToken,
+		"message": "access token successfully refreshed",
 	})
 }

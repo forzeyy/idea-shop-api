@@ -20,7 +20,7 @@ func SetupRoutes(app *fiber.App) {
 
 	api.Post("/login", authHandler.Login)
 	api.Post("/register", authHandler.Register)
-	api.Post("/refresh", authHandler.RefreshToken)
+	api.Post("/refresh", authHandler.Refresh)
 
 	api.Get("/products", productHandler.GetAllProducts)
 	api.Get("/products/:id", productHandler.GetProductByID)
@@ -28,6 +28,6 @@ func SetupRoutes(app *fiber.App) {
 	protected := api.Group("/protected", middleware.Protected())
 
 	// more protected routes later
-	protected.Put("/users/:id", userHandler.UpdateUser)
-	protected.Delete("/users/:id", userHandler.DeleteUser)
+	protected.Get("/profile", userHandler.GetProfile)
+	protected.Put("/profile", userHandler.UpdateProfile)
 }
