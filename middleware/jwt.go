@@ -14,6 +14,7 @@ var RefreshSecret = []byte(os.Getenv("REFRESH_JWT_SECRET"))
 func Protected() func(*fiber.Ctx) error {
 	return jwtware.New(jwtware.Config{
 		SigningKey:   jwtware.SigningKey{Key: AccessSecret},
+		TokenLookup:  "cookie:access_token",
 		ErrorHandler: jwtError,
 	})
 }
