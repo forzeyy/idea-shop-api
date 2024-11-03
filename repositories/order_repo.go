@@ -8,7 +8,7 @@ import (
 
 type OrderRepository interface {
 	GetAllOrders() ([]models.Order, error)
-	GetOrdersByUser(models.User) ([]models.Order, error)
+	GetOrdersByUser(userID uint) ([]models.Order, error)
 	GetOrderByID(id uint) (models.Order, error)
 	CreateOrder(models.Order) (models.Order, error)
 	UpdateOrder(models.Order) (models.Order, error)
@@ -29,11 +29,8 @@ func (db *orderRepository) GetAllOrders() (orders []models.Order, err error) {
 	return orders, db.conn.Find(&orders).Error
 }
 
-func (db *orderRepository) GetOrdersByUser(user models.User) (orders []models.Order, err error) {
-	if err := db.conn.First(&user, user.ID).Error; err != nil {
-		return nil, err
-	}
-	return orders, db.conn.Where("user_id = ?", user.ID).Find(&orders).Error
+func (db *orderRepository) GetOrdersByUser(userID uint) (orders []models.Order, err error) {
+	return orders, db.conn.Where("user_id = ?", userID).Find(&orders).Error
 }
 
 func (db *orderRepository) GetOrderByID(id uint) (order models.Order, err error) {
