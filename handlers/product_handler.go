@@ -9,6 +9,7 @@ import (
 type ProductHandler interface {
 	GetAllProducts(*fiber.Ctx) error
 	GetProductByID(*fiber.Ctx) error
+	GetProductsByCategory(*fiber.Ctx) error
 	CreateProduct(*fiber.Ctx) error
 	UpdateProduct(*fiber.Ctx) error
 	DeleteProduct(*fiber.Ctx) error
@@ -51,6 +52,24 @@ func (h *productHandler) GetProductByID(c *fiber.Ctx) error {
 	}
 
 	return c.Status(fiber.StatusOK).JSON(product)
+}
+
+func (h *productHandler) GetProductsByCategory(c *fiber.Ctx) error {
+	categoryID, err := c.ParamsInt("category_id")
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": err.Error(),
+		})
+	}
+
+	products, err := h.repo.GetProductsByCategory(uint(categoryID))
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": err.Error(),
+		})
+	}
+
+	return c.Status(fiber.StatusOK).JSON(products)
 }
 
 func (h *productHandler) CreateProduct(c *fiber.Ctx) error {

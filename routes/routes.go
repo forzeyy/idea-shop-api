@@ -14,6 +14,7 @@ func SetupRoutes(app *fiber.App) {
 	authHandler := handlers.NewAuthHandler()
 	productHandler := handlers.NewProductHandler()
 	userHandler := handlers.NewUserHandler()
+	cartHandler := handlers.NewCartHandler()
 
 	api := app.Group("/api")
 	api.Get("/", hello)
@@ -24,10 +25,16 @@ func SetupRoutes(app *fiber.App) {
 
 	api.Get("/products", productHandler.GetAllProducts)
 	api.Get("/products/:id", productHandler.GetProductByID)
+	api.Get("/products/category/:category_id", productHandler.GetProductsByCategory)
 
-	protected := api.Group("/protected", middleware.Protected())
+	profile := api.Group("/profile", middleware.Protected())
+	profile.Get("/profile", userHandler.GetProfile)
+	profile.Patch("/profile", userHandler.UpdateProfile)
 
-	// more protected routes later
-	protected.Get("/profile", userHandler.GetProfile)
-	protected.Put("/profile", userHandler.UpdateProfile)
+	cart := api.Group("/cart", middleware.Protected())
+	cart.Get("/", cartHandler.GetCart)
+	cart.Post("/add", cartHandler.AddCartItem)
+	cart.Patch("item/:id", cartHandler.UpdateCartItem)
+	cart.Delete("item/:id", cartHandler.RemoveCartItem)
+	cart.Delete("/clear", cartHandler.ClearCart)
 }

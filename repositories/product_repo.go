@@ -12,6 +12,7 @@ type ProductRepository interface {
 	CreateProduct(models.Product) (models.Product, error)
 	UpdateProduct(models.Product) (models.Product, error)
 	DeleteProduct(models.Product) (models.Product, error)
+	GetProductsByCategory(categoryID uint) ([]models.Product, error)
 }
 
 type productRepository struct {
@@ -49,4 +50,8 @@ func (db *productRepository) DeleteProduct(product models.Product) (models.Produ
 		return product, err
 	}
 	return product, db.conn.Delete(&product).Error
+}
+
+func (db *productRepository) GetProductsByCategory(categoryID uint) (products []models.Product, err error) {
+	return products, db.conn.Joins("JOIN product_categories ON product_categories.id = products.id").Where("product_categories.category_id = ?", categoryID).Find(&products).Error
 }
