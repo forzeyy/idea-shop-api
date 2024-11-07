@@ -43,20 +43,20 @@ func (h *productHandler) UploadProductImage(c *fiber.Ctx) error {
 		})
 	}
 
-	uploadURL, err := h.S3Service.GenerateUploadURL(req.Filename)
+	URL, err := h.S3Service.GenerateDownloadURL(c.Context(), req.Filename)
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"error": "Could not generate upload URL",
+			"error": err.Error(),
 		})
 	}
 
-	if err := h.repo.UpdateProductImageURL(req.ProductID, req.Filename); err != nil {
+	if err := h.repo.UpdateProductImageURL(req.ProductID, URL); err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"error": "couldn't update product image url",
+			"error": err.Error(),
 		})
 	}
 
-	return c.JSON(fiber.Map{"upload_url": uploadURL})
+	return c.JSON(fiber.Map{"upload_url": URL})
 }
 
 func (h *productHandler) GetAllProducts(c *fiber.Ctx) error {

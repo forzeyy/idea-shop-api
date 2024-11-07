@@ -26,6 +26,8 @@ func SetupRoutes(app *fiber.App) {
 	api.Get("/products", productHandler.GetAllProducts)
 	api.Get("/products/:id", productHandler.GetProductByID)
 	api.Get("/products/category/:category_id", productHandler.GetProductsByCategory)
+	api.Post("/products", productHandler.CreateProduct)
+	api.Post("/upload-url", productHandler.UploadProductImage)
 
 	profile := api.Group("/profile", middleware.Protected())
 	profile.Get("/profile", userHandler.GetProfile)
