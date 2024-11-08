@@ -21,7 +21,7 @@ func SetupRoutes(app *fiber.App) {
 
 	admin := app.Group("/admin", middleware.Protected())
 	admin.Post("/register", adminHandler.AdminRegister)
-	admin.Post("/refresh", adminHandler.AdminLogin)
+	admin.Post("/refresh", adminHandler.AdminRefresh)
 	admin.Post("/uploadimage", adminHandler.UploadProductImage)
 
 	api := app.Group("/api")
