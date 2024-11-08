@@ -11,10 +11,18 @@ func hello(c *fiber.Ctx) error {
 }
 
 func SetupRoutes(app *fiber.App) {
+	adminHandler := handlers.NewAdminHandler()
 	authHandler := handlers.NewAuthHandler()
 	productHandler := handlers.NewProductHandler()
 	userHandler := handlers.NewUserHandler()
 	cartHandler := handlers.NewCartHandler()
+
+	app.Post("/admin/login", adminHandler.AdminLogin)
+
+	admin := app.Group("/admin", middleware.Protected())
+	admin.Post("/register", adminHandler.AdminRegister)
+	admin.Post("/refresh", adminHandler.AdminLogin)
+	admin.Post("/uploadimage", adminHandler.UploadProductImage)
 
 	api := app.Group("/api")
 	api.Get("/", hello)
