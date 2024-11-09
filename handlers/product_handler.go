@@ -14,7 +14,7 @@ type ProductHandler interface {
 	UploadProductImage(*fiber.Ctx) error
 	GetAllProducts(*fiber.Ctx) error
 	GetProductByID(*fiber.Ctx) error
-	GetProductsByCategory(*fiber.Ctx) error
+	GetProductsByCategoryID(*fiber.Ctx) error
 	CreateProduct(*fiber.Ctx) error
 	UpdateProduct(*fiber.Ctx) error
 	DeleteProduct(*fiber.Ctx) error
@@ -88,7 +88,7 @@ func (h *productHandler) GetProductByID(c *fiber.Ctx) error {
 	return c.Status(fiber.StatusOK).JSON(product)
 }
 
-func (h *productHandler) GetProductsByCategory(c *fiber.Ctx) error {
+func (h *productHandler) GetProductsByCategoryID(c *fiber.Ctx) error {
 	categoryID, err := c.ParamsInt("category_id")
 	if err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{

@@ -3,12 +3,13 @@ package models
 import "time"
 
 type Order struct {
-	ID        uint        `json:"id" gorm:"primaryKey"`
-	UserID    uint        `json:"user_id"`
-	User      User        `gorm:"foreignKey:UserID"`
-	Items     []OrderItem `json:"order_items"`
-	CreatedAt time.Time
-	UpdatedAt time.Time
+	ID         uint        `json:"id" gorm:"primaryKey"`
+	UserID     uint        `json:"user_id"`
+	User       User        `gorm:"foreignKey:UserID"`
+	Items      []OrderItem `json:"order_items"`
+	IsAccepted bool        `json:"is_accepted" gorm:"default:false"`
+	CreatedAt  time.Time
+	UpdatedAt  time.Time
 }
 
 type OrderItem struct {

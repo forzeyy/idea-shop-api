@@ -13,6 +13,7 @@ type OrderRepository interface {
 	CreateOrder(models.Order) (models.Order, error)
 	UpdateOrder(models.Order) (models.Order, error)
 	DeleteOrder(models.Order) (models.Order, error)
+	AcceptOrder(models.Order) (models.Order, error)
 }
 
 type orderRepository struct {
@@ -54,4 +55,8 @@ func (db *orderRepository) DeleteOrder(order models.Order) (models.Order, error)
 		return order, err
 	}
 	return order, db.conn.Delete(&order).Error
+}
+
+func (db *orderRepository) AcceptOrder(order models.Order) (models.Order, error) {
+	return order, db.conn.Raw("UPDATE orders SET is_accepted = ? WHERE id = ?", true, order.ID).Error
 }

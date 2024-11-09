@@ -9,8 +9,9 @@ import (
 type CommentRepository interface {
 	GetAllComments() ([]models.Comment, error)
 	GetCommentByID(id uint) (models.Comment, error)
+	GetCommentsByProductID(productID uint) ([]models.Comment, error)
 	GetCommentsByUser(userID uint) ([]models.Comment, error)
-	CreateComment(models.Comment) (models.Comment, error)
+	CreateComment(comment models.Comment, productID uint) (models.Comment, error)
 	UpdateComment(models.Comment) (models.Comment, error)
 	DeleteComment(models.Comment) (models.Comment, error)
 }
@@ -33,11 +34,16 @@ func (db *commentRepository) GetCommentByID(id uint) (comment models.Comment, er
 	return comment, db.conn.First(&comment, id).Error
 }
 
+func (db *commentRepository) GetCommentsByProductID(productID uint) (comments []models.Comment, err error) {
+	return comments, db.conn.Where("product_id = ?", productID).Find(&comments).Error
+}
+
 func (db *commentRepository) GetCommentsByUser(userID uint) (comments []models.Comment, err error) {
 	return comments, db.conn.Where("user_id = ?", userID).Find(&comments).Error
 }
 
-func (db *commentRepository) CreateComment(comment models.Comment) (models.Comment, error) {
+func (db *commentRepository) CreateComment(comment models.Comment, productID uint) (models.Comment, error) {
+	comment.ProductID = productID
 	return comment, db.conn.Create(&comment).Error
 }
 

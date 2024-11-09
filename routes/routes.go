@@ -16,6 +16,7 @@ func SetupRoutes(app *fiber.App) {
 	productHandler := handlers.NewProductHandler()
 	userHandler := handlers.NewUserHandler()
 	cartHandler := handlers.NewCartHandler()
+	commentHandler := handlers.NewCommentHandler()
 
 	app.Post("/admin/login", adminHandler.AdminLogin)
 
@@ -23,6 +24,7 @@ func SetupRoutes(app *fiber.App) {
 	admin.Post("/register", adminHandler.AdminRegister)
 	admin.Post("/refresh", adminHandler.AdminRefresh)
 	admin.Post("/uploadimage", adminHandler.UploadProductImage)
+	admin.Post("/products", productHandler.CreateProduct)
 
 	api := app.Group("/api")
 	api.Get("/", hello)
@@ -31,11 +33,11 @@ func SetupRoutes(app *fiber.App) {
 	api.Post("/register", authHandler.Register)
 	api.Post("/refresh", authHandler.Refresh)
 
-	api.Get("/products", productHandler.GetAllProducts)
-	api.Get("/products/:id", productHandler.GetProductByID)
-	api.Get("/products/category/:category_id", productHandler.GetProductsByCategory)
-	api.Post("/products", productHandler.CreateProduct)
-	api.Post("/upload-url", productHandler.UploadProductImage)
+	products := api.Group("/products")
+	products.Get("/", productHandler.GetAllProducts)
+	products.Get("/:id", productHandler.GetProductByID)
+	products.Get("/category/:category_id", productHandler.GetProductsByCategoryID)
+	products.Get("/comments", commentHandler.GetCommentsByProductID)
 
 	profile := api.Group("/profile", middleware.Protected())
 	profile.Get("/profile", userHandler.GetProfile)
@@ -47,4 +49,9 @@ func SetupRoutes(app *fiber.App) {
 	cart.Patch("item/:id", cartHandler.UpdateCartItem)
 	cart.Delete("item/:id", cartHandler.RemoveCartItem)
 	cart.Delete("/clear", cartHandler.ClearCart)
+
+	comment := api.Group("/comment", middleware.Protected())
+	comment.Get("/:user_id", commentHandler.GetCommentsByUser)
+	comment.Post("/:product_id", commentHandler.NewComment)
+	comment.Delete("/:id", commentHandler.DeleteComment)
 }
