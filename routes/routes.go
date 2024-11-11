@@ -25,6 +25,7 @@ func SetupRoutes(app *fiber.App) {
 	admin.Post("/refresh", adminHandler.AdminRefresh)
 	admin.Post("/uploadimage", adminHandler.UploadProductImage)
 	admin.Post("/products", productHandler.CreateProduct)
+	admin.Post("/add-category", adminHandler.AddCategory)
 
 	api := app.Group("/api")
 	api.Get("/", hello)

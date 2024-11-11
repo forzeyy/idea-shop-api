@@ -8,6 +8,7 @@ type Order struct {
 	User       User        `gorm:"foreignKey:UserID"`
 	Items      []OrderItem `json:"order_items"`
 	IsAccepted bool        `json:"is_accepted" gorm:"default:false"`
+	IsActive   bool        `json:"is_active" gorm:"default:true"`
 	CreatedAt  time.Time
 	UpdatedAt  time.Time
 }

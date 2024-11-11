@@ -18,19 +18,22 @@ type AdminHandler interface {
 	AdminLogin(*fiber.Ctx) error
 	AdminRefresh(*fiber.Ctx) error
 	AdminRegister(*fiber.Ctx) error
+	AddCategory(*fiber.Ctx) error
 }
 
 type adminHandler struct {
-	adminRepo   repositories.AdminRepository
-	S3Service   *middleware.S3Service
-	productRepo repositories.ProductRepository
+	adminRepo    repositories.AdminRepository
+	S3Service    *middleware.S3Service
+	productRepo  repositories.ProductRepository
+	categoryRepo repositories.CategoryRepository
 }
 
 func NewAdminHandler() AdminHandler {
 	return &adminHandler{
-		adminRepo:   repositories.NewAdminRepository(),
-		S3Service:   middleware.NewS3Service(utils.S3Client, os.Getenv("BUCKET_NAME")),
-		productRepo: repositories.NewProductRepository(),
+		adminRepo:    repositories.NewAdminRepository(),
+		S3Service:    middleware.NewS3Service(utils.S3Client, os.Getenv("BUCKET_NAME")),
+		productRepo:  repositories.NewProductRepository(),
+		categoryRepo: repositories.NewCategoryRepository(),
 	}
 }
 
@@ -208,4 +211,22 @@ func (h *adminHandler) AdminRegister(c *fiber.Ctx) error {
 	return c.Status(fiber.StatusCreated).JSON(fiber.Map{
 		"message": "success",
 	})
+}
+
+func (h *adminHandler) AddCategory(c *fiber.Ctx) error {
+	var category models.Category
+	if err := c.BodyParser(&category); err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": err.Error(),
+		})
+	}
+
+	category, err := h.categoryRepo.CreateCategory(category)
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": err.Error(),
+		})
+	}
+
+	return c.Status(fiber.StatusOK).JSON(category)
 }

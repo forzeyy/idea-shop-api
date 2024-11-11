@@ -60,3 +60,7 @@ func (db *orderRepository) DeleteOrder(order models.Order) (models.Order, error)
 func (db *orderRepository) AcceptOrder(order models.Order) (models.Order, error) {
 	return order, db.conn.Raw("UPDATE orders SET is_accepted = ? WHERE id = ?", true, order.ID).Error
 }
+
+func (db *orderRepository) MakeOrderInactive(order models.Order) (models.Order, error) {
+	return order, db.conn.Raw("UPDATE orders SET is_active = ? WHERE id = ?", false, order.ID).Error
+}
