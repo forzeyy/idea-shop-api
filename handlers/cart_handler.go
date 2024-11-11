@@ -4,6 +4,7 @@ import (
 	"github.com/forzeyy/idea-shop-api/models"
 	"github.com/forzeyy/idea-shop-api/repositories"
 	"github.com/gofiber/fiber/v2"
+	"github.com/golang-jwt/jwt/v5"
 )
 
 type CartHandler interface {
@@ -25,9 +26,16 @@ func NewCartHandler() CartHandler {
 }
 
 func (h *cartHandler) GetCart(c *fiber.Ctx) error {
-	userID := c.Locals("user_id").(uint)
+	userToken := c.Locals("user").(*jwt.Token)
+	claims := userToken.Claims.(jwt.MapClaims)
 
-	cart, err := h.repo.GetCartByUserID(userID)
+	userID, ok := claims["user_id"].(float64)
+	if !ok {
+		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
+			"error": "invalid token",
+		})
+	}
+	cart, err := h.repo.GetCartByUserID(uint(userID))
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"error": err.Error(),
@@ -38,8 +46,16 @@ func (h *cartHandler) GetCart(c *fiber.Ctx) error {
 }
 
 func (h *cartHandler) AddCartItem(c *fiber.Ctx) error {
-	userID := c.Locals("user_id").(uint)
-	cart, err := h.repo.GetCartByUserID(userID)
+	userToken := c.Locals("user").(*jwt.Token)
+	claims := userToken.Claims.(jwt.MapClaims)
+
+	userID, ok := claims["user_id"].(float64)
+	if !ok {
+		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
+			"error": "invalid token",
+		})
+	}
+	cart, err := h.repo.GetCartByUserID(uint(userID))
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"error": err.Error(),
@@ -47,6 +63,7 @@ func (h *cartHandler) AddCartItem(c *fiber.Ctx) error {
 	}
 
 	var item models.CartItem
+	item.CartID = cart.ID
 	if err := c.BodyParser(&item); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"error": err.Error(),
@@ -64,8 +81,16 @@ func (h *cartHandler) AddCartItem(c *fiber.Ctx) error {
 }
 
 func (h *cartHandler) UpdateCartItem(c *fiber.Ctx) error {
-	userID := c.Locals("user_id").(uint)
-	cart, err := h.repo.GetCartByUserID(userID)
+	userToken := c.Locals("user").(*jwt.Token)
+	claims := userToken.Claims.(jwt.MapClaims)
+
+	userID, ok := claims["user_id"].(float64)
+	if !ok {
+		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
+			"error": "invalid token",
+		})
+	}
+	cart, err := h.repo.GetCartByUserID(uint(userID))
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"error": err.Error(),
@@ -98,8 +123,16 @@ func (h *cartHandler) UpdateCartItem(c *fiber.Ctx) error {
 }
 
 func (h *cartHandler) RemoveCartItem(c *fiber.Ctx) error {
-	userID := c.Locals("user_id").(uint)
-	cart, err := h.repo.GetCartByUserID(userID)
+	userToken := c.Locals("user").(*jwt.Token)
+	claims := userToken.Claims.(jwt.MapClaims)
+
+	userID, ok := claims["user_id"].(float64)
+	if !ok {
+		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
+			"error": "invalid token",
+		})
+	}
+	cart, err := h.repo.GetCartByUserID(uint(userID))
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"error": err.Error(),
@@ -126,8 +159,16 @@ func (h *cartHandler) RemoveCartItem(c *fiber.Ctx) error {
 }
 
 func (h *cartHandler) ClearCart(c *fiber.Ctx) error {
-	userID := c.Locals("user_id").(uint)
-	cart, err := h.repo.GetCartByUserID(userID)
+	userToken := c.Locals("user").(*jwt.Token)
+	claims := userToken.Claims.(jwt.MapClaims)
+
+	userID, ok := claims["user_id"].(float64)
+	if !ok {
+		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
+			"error": "invalid token",
+		})
+	}
+	cart, err := h.repo.GetCartByUserID(uint(userID))
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"error": err.Error(),

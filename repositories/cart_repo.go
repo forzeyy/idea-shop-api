@@ -7,6 +7,7 @@ import (
 )
 
 type CartRepository interface {
+	CreateCart(userID uint) (models.Cart, error)
 	GetCartByUserID(userID uint) (models.Cart, error)
 	AddItemToCart(cartID uint, item models.CartItem) (models.CartItem, error)
 	UpdateCartItem(cartID uint, item models.CartItem) (models.CartItem, error)
@@ -24,13 +25,32 @@ func NewCartRepository() CartRepository {
 	}
 }
 
+func (db *cartRepository) CreateCart(userID uint) (cart models.Cart, err error) {
+	cart.UserID = userID
+	return cart, db.conn.Create(&cart).Error
+}
+
 func (db *cartRepository) GetCartByUserID(userID uint) (cart models.Cart, err error) {
-	return cart, db.conn.Preload("Items").Where("user_id = ?", userID).First(&cart).Error
+	return cart, db.conn.Preload("User").Preload("Items.Product").Where("user_id = ?", userID).First(&cart).Error
 }
 
 func (db *cartRepository) AddItemToCart(cartID uint, item models.CartItem) (models.CartItem, error) {
 	item.CartID = cartID
-	return item, db.conn.Create(&item).Error
+	if err := db.conn.Create(&item).Error; err != nil {
+		return models.CartItem{}, err
+	}
+
+	var cart models.Cart
+	if err := db.conn.Preload("Items").First(&cart, cartID).Error; err != nil {
+		return models.CartItem{}, err
+	}
+
+	cart.Items = append(cart.Items, item)
+	if err := db.conn.Save(&cart).Error; err != nil {
+		return models.CartItem{}, err
+	}
+
+	return item, nil
 }
 
 func (db *cartRepository) UpdateCartItem(cartID uint, item models.CartItem) (models.CartItem, error) {

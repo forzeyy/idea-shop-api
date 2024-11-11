@@ -42,8 +42,8 @@ func SetupRoutes(app *fiber.App) {
 	products.Get("/comments", commentHandler.GetCommentsByProductID)
 
 	profile := api.Group("/profile", middleware.Protected())
-	profile.Get("/profile", userHandler.GetProfile)
-	profile.Patch("/profile", userHandler.UpdateProfile)
+	profile.Get("/", userHandler.GetProfile)
+	profile.Patch("/", userHandler.UpdateProfile)
 
 	cart := api.Group("/cart", middleware.Protected())
 	cart.Get("/", cartHandler.GetCart)

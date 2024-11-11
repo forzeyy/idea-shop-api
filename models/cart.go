@@ -6,7 +6,7 @@ type Cart struct {
 	ID        uint       `json:"id" gorm:"primaryKey"`
 	UserID    uint       `json:"user_id"`
 	User      User       `gorm:"foreignKey:UserID"`
-	Items     []CartItem `json:"cart_items"`
+	Items     []CartItem `json:"cart_items" gorm:"foreignKey:CartID"`
 	CreatedAt time.Time
 	UpdatedAt time.Time
 }

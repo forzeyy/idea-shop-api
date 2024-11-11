@@ -18,11 +18,13 @@ type AuthHandler interface {
 
 type authHandler struct {
 	userRepo repositories.UserRepository
+	cartRepo repositories.CartRepository
 }
 
 func NewAuthHandler() AuthHandler {
 	return &authHandler{
 		userRepo: repositories.NewUserRepository(),
+		cartRepo: repositories.NewCartRepository(),
 	}
 }
 
@@ -97,9 +99,22 @@ func (h *authHandler) Register(c *fiber.Ctx) error {
 	}
 	user.Password = hashedPassword
 
-	if _, err := h.userRepo.CreateUser(user); err != nil {
+	if user, err = h.userRepo.CreateUser(user); err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"error": "couldn't create user",
+		})
+	}
+
+	createdUser, err := h.userRepo.GetUserByPhone(user.Phone)
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": err.Error(),
+		})
+	}
+
+	if _, err := h.cartRepo.CreateCart(createdUser.ID); err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": "couldn't create cart",
 		})
 	}
 
