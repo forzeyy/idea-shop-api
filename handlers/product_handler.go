@@ -18,6 +18,7 @@ type ProductHandler interface {
 	CreateProduct(*fiber.Ctx) error
 	UpdateProduct(*fiber.Ctx) error
 	DeleteProduct(*fiber.Ctx) error
+	SearchProducts(*fiber.Ctx) error
 }
 
 type productHandler struct {
@@ -168,4 +169,18 @@ func (h *productHandler) DeleteProduct(c *fiber.Ctx) error {
 	}
 
 	return c.Status(fiber.StatusOK).JSON(product)
+}
+
+func (h *productHandler) SearchProducts(c *fiber.Ctx) error {
+	searchQuery := c.Params("query")
+
+	products, err := h.repo.SearchProducts(searchQuery)
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": err.Error(),
+		})
+	}
+
+	return c.Status(fiber.StatusOK).JSON(products)
+
 }

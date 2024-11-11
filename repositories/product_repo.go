@@ -14,6 +14,7 @@ type ProductRepository interface {
 	DeleteProduct(models.Product) (models.Product, error)
 	GetProductsByCategory(categoryID uint) ([]models.Product, error)
 	UpdateProductImageURL(id uint, imageURL string) error
+	SearchProducts(query string) ([]models.Product, error)
 }
 
 type productRepository struct {
@@ -59,4 +60,8 @@ func (db *productRepository) GetProductsByCategory(categoryID uint) (products []
 
 func (db *productRepository) UpdateProductImageURL(id uint, imageURL string) error {
 	return db.conn.Model(&models.Product{}).Where("id = ?", id).Update("image_url", imageURL).Error
+}
+
+func (db *productRepository) SearchProducts(query string) (products []models.Product, err error) {
+	return products, db.conn.Where("LIKE ?", "%"+query+"%").Find(&products).Error
 }
