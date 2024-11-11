@@ -63,5 +63,5 @@ func (db *productRepository) UpdateProductImageURL(id uint, imageURL string) err
 }
 
 func (db *productRepository) SearchProducts(query string) (products []models.Product, err error) {
-	return products, db.conn.Where("LIKE ?", "%"+query+"%").Find(&products).Error
+	return products, db.conn.Where("name LIKE ? OR description LIKE ?", "%"+query+"%").Find(&products).Error
 }
